@@ -1,0 +1,7 @@
+/workspaces/agentcon-25-swe-agents/legacy-java/src/main/java/com/insurance/claims/model/Claim.java
+/workspaces/agentcon-25-swe-agents/legacy-java/src/main/java/com/insurance/claims/controller/ClaimController.java
+/workspaces/agentcon-25-swe-agents/legacy-java/src/main/java/com/insurance/claims/ClaimsApiApplication.java
+/workspaces/agentcon-25-swe-agents/legacy-java/src/main/java/com/insurance/claims/model/ClaimStatus.java
+/workspaces/agentcon-25-swe-agents/legacy-java/src/main/java/com/insurance/claims/service/ClaimService.java
+/workspaces/agentcon-25-swe-agents/legacy-java/src/main/java/com/insurance/claims/exception/GlobalExceptionHandler.java
+/workspaces/agentcon-25-swe-agents/legacy-java/src/main/java/com/insurance/claims/dto/ClaimRequest.java
