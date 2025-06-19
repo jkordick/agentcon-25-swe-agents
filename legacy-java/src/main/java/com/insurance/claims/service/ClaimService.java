@@ -98,4 +98,12 @@ public class ClaimService {
     public int getClaimsCount() {
         return claimsStorage.size();
     }
+    
+    /**
+     * Clears all claims from storage - used for testing
+     */
+    public void clearAllClaims() {
+        claimsStorage.clear();
+        idGenerator.set(1);
+    }
 }

@@ -2,6 +2,7 @@ package com.insurance.claims.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.insurance.claims.dto.ClaimRequest;
+import com.insurance.claims.model.Claim;
 import com.insurance.claims.model.ClaimStatus;
 import com.insurance.claims.service.ClaimService;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -48,6 +54,12 @@ public class ClaimControllerTest {
     
     @Test
     public void testGetClaim_ExistingId_ReturnsOk() throws Exception {
+        // Mock the service to return a claim
+        Claim mockClaim = new Claim(12345L, "Auto", "Test claim");
+        mockClaim.setId(1L);
+        mockClaim.setStatus(ClaimStatus.SUBMITTED);
+        when(claimService.getClaimById(eq(1L))).thenReturn(Optional.of(mockClaim));
+        
         mockMvc.perform(get("/claims/1"))
                 .andExpect(status().isOk());
     }

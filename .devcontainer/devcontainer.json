@@ -1,0 +1,88 @@
+{
+  "name": "AgentCon 2025 - Multi-Language Insurance Services",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "11",
+      "installMaven": true,
+      "installGradle": false
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "16",
+      "nodeGypDependencies": true,
+      "installYarnUsingApt": true
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.8",
+      "installTools": true,
+      "optimize": true
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-java-pack",
+        "ms-python.python",
+        "ms-python.autopep8",
+        "ms-python.pylint",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.js-debug",
+        "ms-vscode.vscode-typescript-next",
+        "redhat.java",
+        "vscjava.vscode-java-debug",
+        "vscjava.vscode-java-test",
+        "vscjava.vscode-maven",
+        "ms-vscode.test-adapter-converter",
+        "hbenl.vscode-test-explorer",
+        "formulahendry.auto-rename-tag",
+        "github.copilot",
+        "github.copilot-chat",
+        "ms-vscode.live-server",
+        "humao.rest-client"
+      ],
+      "settings": {
+        "java.home": "/usr/lib/jvm/msopenjdk-current",
+        "java.configuration.runtimes": [
+          {
+            "name": "JavaSE-11",
+            "path": "/usr/lib/jvm/msopenjdk-current"
+          }
+        ],
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "files.exclude": {
+          "**/target": true,
+          "**/node_modules": true,
+          "**/__pycache__": true,
+          "**/.pytest_cache": true
+        }
+      }
+    }
+  },
+  "forwardPorts": [
+    8080,
+    3000,
+    5000
+  ],
+  "portsAttributes": {
+    "8080": {
+      "label": "Java Claims API",
+      "onAutoForward": "notify"
+    },
+    "3000": {
+      "label": "Node.js Quote API", 
+      "onAutoForward": "notify"
+    },
+    "5000": {
+      "label": "Python Customer API",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "remoteUser": "vscode"
+}

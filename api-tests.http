@@ -1,0 +1,31 @@
+### Test Java Claims API
+GET http://localhost:8080/health
+Accept: application/json
+
+### Test Node.js Quote API  
+GET http://localhost:3000/health
+Accept: application/json
+
+### Test Python Customer API
+GET http://localhost:5000/health
+Accept: application/json
+
+### Create a new claim (Java API)
+POST http://localhost:8080/api/claims
+Content-Type: application/json
+
+{
+  "policyNumber": "POL123456",
+  "description": "Car accident on highway",
+  "amount": 5000.00
+}
+
+### Get a quote (Node.js API)
+POST http://localhost:3000/api/quote
+Content-Type: application/json
+
+{
+  "age": 30,
+  "vehicleType": "sedan",
+  "coverage": "comprehensive"
+}

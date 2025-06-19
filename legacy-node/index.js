@@ -28,8 +28,11 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Insurance Quote API server is running on port ${PORT}`);
-});
+// Only start the server if this file is run directly (not required by tests)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Insurance Quote API server is running on port ${PORT}`);
+  });
+}
 
 module.exports = app;

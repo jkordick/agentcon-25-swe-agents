@@ -17,6 +17,7 @@ public class ClaimServiceTest {
     @BeforeEach
     public void setUp() {
         claimService = new ClaimService();
+        claimService.clearAllClaims(); // Clear hardcoded claims for clean testing
     }
     
     @Test
