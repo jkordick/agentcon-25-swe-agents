@@ -20,8 +20,7 @@
       "optimize": true
     },
     "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "customizations": {
     "vscode": {
@@ -46,11 +45,11 @@
         "humao.rest-client"
       ],
       "settings": {
-        "java.home": "/usr/lib/jvm/msopenjdk-current",
+        "java.jdt.ls.java.home": "/usr/local/sdkman/candidates/java/current",
         "java.configuration.runtimes": [
           {
             "name": "JavaSE-11",
-            "path": "/usr/lib/jvm/msopenjdk-current"
+            "path": "/usr/local/sdkman/candidates/java/current"
           }
         ],
         "python.defaultInterpreterPath": "/usr/local/bin/python",

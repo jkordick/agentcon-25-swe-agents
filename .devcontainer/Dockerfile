@@ -21,7 +21,7 @@ RUN mkdir -p /workspaces/agentcon-25-swe-agents
 WORKDIR /workspaces/agentcon-25-swe-agents
 
 # Set environment variables for development
-ENV JAVA_HOME=/usr/lib/jvm/msopenjdk-current
+ENV JAVA_HOME=/usr/local/sdkman/candidates/java/current
 ENV PATH=$JAVA_HOME/bin:$PATH
 ENV NODE_ENV=development
 ENV PYTHONPATH=/workspaces/agentcon-25-swe-agents/legacy-python
@@ -31,5 +31,6 @@ ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
-# The base image already creates the vscode user, so we just need to ensure proper permissions
+# Ubuntu base image already has vscode user configured properly
+# Just ensure proper permissions
 RUN chown -R $USERNAME:$USERNAME /workspaces
