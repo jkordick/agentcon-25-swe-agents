@@ -46,6 +46,10 @@ class TestCustomerProfileService:
         data = response.json()
         assert "service" in data
         assert data["service"] == "Customer Profile Service"
+        # Check that new endpoint is listed
+        endpoints = data.get("endpoints", [])
+        risk_endpoint = "GET /customers/{id}/risk-profile - Get customer risk assessment"
+        assert any(risk_endpoint in endpoint for endpoint in endpoints)
 
     def test_health_check(self):
         """Test the health check endpoint"""
@@ -63,6 +67,80 @@ class TestCustomerProfileService:
         assert data["first_name"] == "Julia"
         assert data["last_name"] == "Kordick"
         assert data["email"] == "julia.kordick@example.com"
+
+    def test_get_customer_risk_profile(self):
+        """Test getting customer risk profile"""
+        response = requests.get(f"{BASE_URL}/customers/1/risk-profile")
+        assert response.status_code == 200
+        data = response.json()
+        
+        # Check basic structure
+        assert "customer_id" in data
+        assert "risk_score" in data
+        assert "risk_level" in data
+        assert "risk_factors" in data
+        assert "recommendations" in data
+        assert "calculated_at" in data
+        assert "expires_at" in data
+        
+        # Check customer ID
+        assert data["customer_id"] == 1
+        
+        # Check risk score is reasonable
+        assert isinstance(data["risk_score"], int)
+        assert 0 <= data["risk_score"] <= 100
+        
+        # Check risk level is valid
+        assert data["risk_level"] in ["LOW", "MODERATE", "HIGH"]
+        
+        # Check risk factors structure
+        risk_factors = data["risk_factors"]
+        assert "age_factor" in risk_factors
+        assert "location_factor" in risk_factors
+        assert "profile_completeness" in risk_factors
+        
+        for factor in risk_factors.values():
+            assert "score" in factor
+            assert "description" in factor
+            assert isinstance(factor["score"], int)
+            assert isinstance(factor["description"], str)
+        
+        # Check recommendations is a list
+        assert isinstance(data["recommendations"], list)
+        assert len(data["recommendations"]) > 0
+        
+        # Check timestamps are ISO format
+        assert "T" in data["calculated_at"]
+        assert "T" in data["expires_at"]
+
+    def test_get_all_customers_risk_profiles(self):
+        """Test risk profiles for all customers"""
+        for customer_id in [1, 2, 3]:
+            response = requests.get(f"{BASE_URL}/customers/{customer_id}/risk-profile")
+            assert response.status_code == 200
+            data = response.json()
+            assert data["customer_id"] == customer_id
+            assert isinstance(data["risk_score"], int)
+            assert data["risk_level"] in ["LOW", "MODERATE", "HIGH"]
+
+    def test_risk_profile_nonexistent_customer(self):
+        """Test risk profile for non-existent customer"""
+        response = requests.get(f"{BASE_URL}/customers/999/risk-profile")
+        assert response.status_code == 404
+        data = response.json()
+        assert "not found" in data["error"].lower()
+
+    def test_risk_profile_invalid_customer_id(self):
+        """Test risk profile with invalid customer ID"""
+        response = requests.get(f"{BASE_URL}/customers/0/risk-profile")
+        assert response.status_code == 400
+        data = response.json()
+        assert "positive integer" in data["error"].lower()
+
+    def test_risk_profile_non_numeric_id(self):
+        """Test risk profile with non-numeric customer ID"""
+        response = requests.get(f"{BASE_URL}/customers/abc/risk-profile")
+        assert response.status_code == 400
 
     def test_get_nonexistent_customer(self):
         """Test fetching a non-existent customer"""
