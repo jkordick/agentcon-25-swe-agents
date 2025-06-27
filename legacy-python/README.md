@@ -5,6 +5,7 @@ A Python 3.8 customer profile service using Python's built-in `http.server` modu
 ## Features
 
 - **GET /customers/{id}** - Fetch a customer's profile by ID
+- **GET /customers/{id}/risk-profile** - Get customer risk assessment for insurance underwriting
 - **PATCH /customers/{id}** - Update customer fields (phone number, address, email)
 - Hardcoded test data for 3 customers:
   - Julia Kordick (ID: 1)
@@ -36,6 +37,11 @@ The service will be available at `http://localhost:8000`
 curl -X GET "http://localhost:8000/customers/1"
 ```
 
+### Get customer risk assessment
+```bash
+curl -X GET "http://localhost:8000/customers/1/risk-profile"
+```
+
 ### Update customer phone number
 ```bash
 curl -X PATCH "http://localhost:8000/customers/1" \
@@ -65,7 +71,9 @@ legacy-python/
 ├── main.py           # HTTP server application entry point
 ├── models.py         # Customer model and validation functions
 ├── database.py       # In-memory database simulation
-├── test_main.py      # Test suite
+├── risk_calculator.py # Risk assessment calculation logic
+├── test_main.py      # Test suite for main application
+├── test_risk_calculator.py # Test suite for risk calculator
 ├── requirements.txt  # Python dependencies (minimal)
 └── README.md         # This file
 ```
@@ -105,6 +113,48 @@ Update customer fields. Only provided fields will be updated.
 - `phone_number` (string)
 - `address` (string)
 - `email` (string)
+
+### GET /customers/{id}/risk-profile
+Calculate and return insurance risk assessment for a customer.
+
+**Response Example:**
+```json
+{
+  "customer_id": 1,
+  "risk_score": 82,
+  "risk_level": "MODERATE",
+  "risk_factors": {
+    "age_factor": {
+      "score": 85,
+      "description": "Age 40 - lower risk demographic"
+    },
+    "location_factor": {
+      "score": 70,
+      "description": "Urban area - moderate crime rates"
+    },
+    "profile_completeness": {
+      "score": 95,
+      "description": "Complete profile with verified contact info"
+    }
+  },
+  "recommendations": [
+    "Standard coverage recommended",
+    "Monitor profile for improvements"
+  ],
+  "calculated_at": "2025-06-27T09:52:06.839127Z",
+  "expires_at": "2025-07-04T09:52:06.839127Z"
+}
+```
+
+**Risk Calculation Logic:**
+- **Age Factor (30% weight)**: Based on customer's age from date_of_birth
+- **Location Factor (40% weight)**: Based on address zip code analysis  
+- **Profile Completeness (30% weight)**: Based on data quality and completeness
+
+**Risk Levels:**
+- **LOW** (85-100): Preferred rates eligible
+- **MODERATE** (70-84): Standard coverage
+- **HIGH** (0-69): Enhanced screening recommended
 
 ## Test Data
 

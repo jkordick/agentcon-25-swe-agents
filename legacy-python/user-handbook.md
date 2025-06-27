@@ -68,7 +68,69 @@ curl -X GET "http://localhost:8000/customers/1"
 }
 ```
 
-### 2. Update Customer Information
+### 2. Get Customer Risk Assessment
+
+Calculate and retrieve a customer's insurance risk profile, including risk scores, level assessment, and recommendations.
+
+**Endpoint:** `GET /customers/{id}/risk-profile`
+
+**Example:**
+```bash
+curl -X GET "http://localhost:8000/customers/1/risk-profile"
+```
+
+**Response:**
+```json
+{
+  "customer_id": 1,
+  "risk_score": 82,
+  "risk_level": "MODERATE",
+  "risk_factors": {
+    "age_factor": {
+      "score": 85,
+      "description": "Age 40 - lower risk demographic"
+    },
+    "location_factor": {
+      "score": 70,
+      "description": "Urban area - moderate crime rates"
+    },
+    "profile_completeness": {
+      "score": 95,
+      "description": "Complete profile with verified contact info"
+    }
+  },
+  "recommendations": [
+    "Standard coverage recommended",
+    "Monitor profile for improvements"
+  ],
+  "calculated_at": "2025-06-27T09:52:06.839127Z",
+  "expires_at": "2025-07-04T09:52:06.839127Z"
+}
+```
+
+#### Risk Assessment Components
+
+**Risk Score:** Overall risk assessment (0-100 scale)
+- Higher scores indicate lower risk
+- Calculated using weighted factors
+
+**Risk Level Categories:**
+- **LOW** (85-100): Preferred customer, eligible for best rates
+- **MODERATE** (70-84): Standard customer, normal coverage
+- **HIGH** (0-69): Higher risk customer, enhanced screening recommended
+
+**Risk Factors:** Three components used in calculation
+1. **Age Factor (30% weight)**: Based on customer's age from date of birth
+2. **Location Factor (40% weight)**: Based on address and geographic risk analysis
+3. **Profile Completeness (30% weight)**: Based on data quality and completeness
+
+**Recommendations:** Tailored suggestions based on risk assessment
+
+**Timestamps:**
+- `calculated_at`: When the assessment was performed
+- `expires_at`: When the assessment expires (7 days from calculation)
+
+### 3. Update Customer Information
 
 Modify specific fields in a customer's profile. You can update one or more fields in a single request.
 
@@ -294,6 +356,28 @@ curl -X PATCH "http://localhost:8000/customers/1" \
 ```json
 {
   "error": "Invalid JSON data"
+}
+```
+
+#### Risk Assessment Insufficient Data (422)
+```bash
+curl -X GET "http://localhost:8000/customers/1/risk-profile"
+# (if customer has missing date_of_birth)
+```
+```json
+{
+  "error": "Customer has insufficient data for risk calculation - missing date_of_birth"
+}
+```
+
+#### Risk Assessment Calculation Error (422)
+```bash
+curl -X GET "http://localhost:8000/customers/1/risk-profile"
+# (if customer has invalid date format)
+```
+```json
+{
+  "error": "Customer has insufficient data for risk calculation: Invalid date_of_birth format"
 }
 ```
 
