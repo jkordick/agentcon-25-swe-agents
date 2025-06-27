@@ -1,6 +1,6 @@
 ### Test Java Claims API
-GET http://localhost:8080/health
-Accept: application/json
+GET http://localhost:8080/api/claims/health
+Accept: text/plain
 
 ### Test Node.js Quote API  
 GET http://localhost:3000/health
@@ -15,10 +15,14 @@ POST http://localhost:8080/api/claims
 Content-Type: application/json
 
 {
-  "policyNumber": "POL123456",
-  "description": "Car accident on highway",
-  "amount": 5000.00
+  "customerId": 12345,
+  "claimType": "Auto",
+  "description": "Car accident on highway"
 }
+
+### Get claim details (Java API)
+GET http://localhost:8080/api/claims/1
+Accept: application/json
 
 ### Get a quote (Node.js API)
 POST http://localhost:3000/api/quote
