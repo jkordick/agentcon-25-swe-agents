@@ -9,7 +9,7 @@ import re
 import urllib.parse
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
-from models import Customer, validate_customer_update
+from models import Customer, validate_customer_update, calculate_customer_risk_profile
 from database import customer_db
 
 
@@ -47,6 +47,8 @@ class CustomerProfileHandler(BaseHTTPRequestHandler):
                 self._handle_root()
             elif self.path == '/health':
                 self._handle_health()
+            elif self.path.startswith('/customers/') and self.path.endswith('/risk-profile'):
+                self._handle_get_customer_risk_profile()
             elif self.path.startswith('/customers/'):
                 self._handle_get_customer()
             else:
@@ -73,6 +75,7 @@ class CustomerProfileHandler(BaseHTTPRequestHandler):
             "version": "1.0.0",
             "endpoints": [
                 "GET /customers/{id} - Fetch customer profile",
+                "GET /customers/{id}/risk-profile - Get customer risk assessment",
                 "PATCH /customers/{id} - Update customer profile",
                 "GET /health - Health check"
             ]
@@ -112,6 +115,38 @@ class CustomerProfileHandler(BaseHTTPRequestHandler):
             return
         
         self._send_response(200, customer.to_dict())
+    
+    def _handle_get_customer_risk_profile(self):
+        """Handle GET /customers/{id}/risk-profile"""
+        # Extract customer ID from path
+        match = re.match(r'/customers/(\d+)/risk-profile', self.path)
+        if not match:
+            self._send_error_response(400, "Invalid customer ID")
+            return
+        
+        try:
+            customer_id = int(match.group(1))
+        except ValueError:
+            self._send_error_response(400, "Customer ID must be a number")
+            return
+        
+        if customer_id < 1:
+            self._send_error_response(400, "Customer ID must be a positive integer")
+            return
+        
+        customer = customer_db.get_customer(customer_id)
+        if customer is None:
+            self._send_error_response(404, f"Customer with ID {customer_id} not found")
+            return
+        
+        try:
+            risk_profile = calculate_customer_risk_profile(customer)
+            self._send_response(200, risk_profile)
+        except ValueError as e:
+            self._send_error_response(422, f"Insufficient data for risk calculation: {str(e)}")
+        except Exception as e:
+            print(f"Error calculating risk profile: {e}")
+            self._send_error_response(500, "Error calculating risk profile")
     
     def _handle_update_customer(self):
         """Handle PATCH /customers/{id}"""
