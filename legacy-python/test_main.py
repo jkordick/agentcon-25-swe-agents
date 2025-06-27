@@ -145,6 +145,94 @@ class TestCustomerProfileService:
         assert data["first_name"] == "Igor"
         assert data["last_name"] == "Rykhlevskyi"
 
+    def test_get_customer_risk_profile_existing_customer(self):
+        """Test fetching risk profile for an existing customer"""
+        response = requests.get(f"{BASE_URL}/customers/1/risk-profile")
+        assert response.status_code == 200
+        data = response.json()
+        
+        # Check required fields
+        assert "customer_id" in data
+        assert "risk_score" in data
+        assert "risk_level" in data
+        assert "risk_factors" in data
+        assert "recommendations" in data
+        assert "calculated_at" in data
+        assert "expires_at" in data
+        
+        # Check data types and values
+        assert data["customer_id"] == 1
+        assert isinstance(data["risk_score"], int)
+        assert data["risk_level"] in ["LOW", "MODERATE", "HIGH"]
+        assert isinstance(data["recommendations"], list)
+        
+        # Check risk factors structure
+        risk_factors = data["risk_factors"]
+        assert "age_factor" in risk_factors
+        assert "location_factor" in risk_factors
+        assert "profile_completeness" in risk_factors
+        
+        for factor in risk_factors.values():
+            assert "score" in factor
+            assert "description" in factor
+            assert isinstance(factor["score"], int)
+            assert isinstance(factor["description"], str)
+
+    def test_get_customer_risk_profile_all_customers(self):
+        """Test risk profile for all existing customers"""
+        for customer_id in [1, 2, 3]:
+            response = requests.get(f"{BASE_URL}/customers/{customer_id}/risk-profile")
+            assert response.status_code == 200
+            data = response.json()
+            assert data["customer_id"] == customer_id
+            assert 0 <= data["risk_score"] <= 100
+            assert data["risk_level"] in ["LOW", "MODERATE", "HIGH"]
+
+    def test_get_customer_risk_profile_nonexistent_customer(self):
+        """Test fetching risk profile for a non-existent customer"""
+        response = requests.get(f"{BASE_URL}/customers/999/risk-profile")
+        assert response.status_code == 404
+        data = response.json()
+        assert "not found" in data["error"].lower()
+
+    def test_get_customer_risk_profile_invalid_id(self):
+        """Test fetching risk profile with invalid customer ID"""
+        response = requests.get(f"{BASE_URL}/customers/0/risk-profile")
+        assert response.status_code == 400
+        data = response.json()
+        assert "positive integer" in data["error"].lower()
+
+    def test_risk_profile_response_format(self):
+        """Test that risk profile response matches expected format"""
+        response = requests.get(f"{BASE_URL}/customers/1/risk-profile")
+        assert response.status_code == 200
+        data = response.json()
+        
+        # Verify timestamps are in ISO format
+        from datetime import datetime
+        calculated_at = data["calculated_at"]
+        expires_at = data["expires_at"]
+        
+        # Should be able to parse as ISO datetime
+        datetime.fromisoformat(calculated_at.replace('Z', '+00:00'))
+        datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+        
+        # Expires should be after calculated
+        calc_time = datetime.fromisoformat(calculated_at.replace('Z', '+00:00'))
+        exp_time = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+        assert exp_time > calc_time
+
+    def test_root_endpoint_includes_risk_profile(self):
+        """Test that root endpoint includes the new risk profile endpoint"""
+        response = requests.get(f"{BASE_URL}/")
+        assert response.status_code == 200
+        data = response.json()
+        endpoints = data["endpoints"]
+        
+        # Check that risk profile endpoint is listed
+        risk_endpoint_found = any("risk-profile" in endpoint for endpoint in endpoints)
+        assert risk_endpoint_found, "Risk profile endpoint not found in root endpoint list"
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
