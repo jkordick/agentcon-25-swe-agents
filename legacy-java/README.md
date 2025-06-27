@@ -141,7 +141,6 @@ src/
   - **Claim ID 1**: Auto claim (Customer 12345) - Status: UNDER_REVIEW
   - **Claim ID 2**: Home claim (Customer 67890) - Status: APPROVED  
   - **Claim ID 3**: Health claim (Customer 11111) - Status: SUBMITTED
-- The application ignores the outdated `/claims/status/{id}` endpoint mentioned in legacy documentation
 - Auto-incrementing IDs continue from 4 for new claims
 - All timestamps are in UTC format
 - Global exception handler provides consistent error responses with validation details
