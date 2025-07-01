@@ -15,7 +15,7 @@ This project contains **three containerized “legacy” backends** from the ins
 | `legacy-node` | Node.js 16 (Express) | Calculates policy quotes based on input criteria |
 
 Each backend is accompanied by:
-- A `technical_documentation.md`: describing the system architecture and API design
+- A `technical-documentation.md`: describing the system architecture and API design
 - A `user-handbook.md`: meant for business users or external consumers
 
 🚨 **But be warned:** One of these docs is lying to you. The documentation doesn’t always match reality — just like in real life.
