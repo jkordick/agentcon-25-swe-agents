@@ -80,18 +80,6 @@ GET /api/claims/{id}
 
 ---
 
-### 4. Get Claim Status Only
-**Purpose**: Retrieve only the status of a specific claim (lightweight response)
-
-```
-GET /api/claims/status/{id}
-```
-
-**Parameters**:
-- `id` (number): Unique claim identifier
-
-**Response**: Returns only the status information without full claim details
-
 ---
 
 ## Request Examples
@@ -138,14 +126,8 @@ curl -X POST http://localhost:8080/api/claims \
 # Get full details for claim ID 1
 curl http://localhost:8080/api/claims/1
 
-# Get only status for claim ID 1 (lightweight)
-curl http://localhost:8080/api/claims/status/1
-
 # Get full details for claim ID 2
 curl http://localhost:8080/api/claims/2
-
-# Get only status for claim ID 2 (lightweight)
-curl http://localhost:8080/api/claims/status/2
 
 # Check API health and claim count
 curl http://localhost:8080/api/claims/health
@@ -181,15 +163,7 @@ curl http://localhost:8080/api/claims/health
 }
 ```
 
-### Successful Claim Status Retrieval (HTTP 200)
 
-```json
-{
-  "claimId": 1,
-  "status": "UNDER_REVIEW",
-  "lastUpdated": "2025-06-19T12:30:00"
-}
-```
 
 ### Claim Status Values
 
@@ -248,7 +222,7 @@ When requesting a claim that doesn't exist, you'll receive an HTTP 404 status wi
 ### 3. Performance
 - Cache claim data when appropriate to reduce API calls
 - Use the health check endpoint to verify API availability
-- Use the lightweight status endpoint (`/claims/status/{id}`) when you only need status information
+- Use the full claim details endpoint to get complete claim information including status
 - Implement timeouts for your HTTP requests (recommended: 30 seconds)
 
 ### 4. Data Validation
