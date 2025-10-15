@@ -1,4 +1,4 @@
-const { calculatePremium, validateQuoteRequest, VEHICLE_BASE_RATES, AGE_MULTIPLIERS } = require('../services/quoteService');
+const { calculatePremium, validateQuoteRequest, VEHICLE_BASE_RATES, AGE_MULTIPLIERS, COVERAGE_OPTIONS } = require('../services/quoteService');
 
 describe('Quote Service', () => {
   describe('validateQuoteRequest', () => {
@@ -18,6 +18,23 @@ describe('Quote Service', () => {
       expect(result.isValid).toBe(false);
       expect(result.message).toContain('Driver age is required');
     });
+
+    test('should validate coverage options', () => {
+      const result = validateQuoteRequest('car', 30, { roadsideAssistance: true });
+      expect(result.isValid).toBe(true);
+    });
+
+    test('should reject invalid coverage option', () => {
+      const result = validateQuoteRequest('car', 30, { invalidOption: true });
+      expect(result.isValid).toBe(false);
+      expect(result.message).toContain('Unsupported coverage option');
+    });
+
+    test('should reject non-boolean coverage option value', () => {
+      const result = validateQuoteRequest('car', 30, { roadsideAssistance: 'yes' });
+      expect(result.isValid).toBe(false);
+      expect(result.message).toContain('must be a boolean value');
+    });
   });
 
   describe('calculatePremium', () => {
@@ -29,7 +46,8 @@ describe('Quote Service', () => {
       expect(result.ageCategory).toBe('adult');
       expect(result.basePremium).toBe(VEHICLE_BASE_RATES.car);
       expect(result.ageMultiplier).toBe(AGE_MULTIPLIERS.adult);
-      expect(result.finalPremium).toBe(1080); // 1200 * 1.0 * 0.9 (discount for prime age car drivers)
+      expect(result.calculatedPremium).toBe(1080); // 1200 * 1.0 * 0.9 (discount for prime age car drivers)
+      expect(result.finalPremium).toBe(1080); // No coverage options
     });
 
     test('should apply young driver penalty for motorcycle', () => {
@@ -60,6 +78,52 @@ describe('Quote Service', () => {
       
       expect(result.finalPremium).toBeGreaterThan(2500);
       expect(result.status).toBe('peasant');
+    });
+
+    test('should calculate premium with roadside assistance', () => {
+      const result = calculatePremium('car', 35, { roadsideAssistance: true });
+      
+      expect(result.calculatedPremium).toBe(1080);
+      expect(result.coverageOptions.roadsideAssistance).toBe(COVERAGE_OPTIONS.roadsideAssistance);
+      expect(result.totalCoverageCost).toBe(120);
+      expect(result.finalPremium).toBe(1200); // 1080 + 120
+    });
+
+    test('should calculate premium with multiple coverage options', () => {
+      const result = calculatePremium('car', 35, { 
+        roadsideAssistance: true,
+        rentalCar: true,
+        glassCoverage: true
+      });
+      
+      expect(result.calculatedPremium).toBe(1080);
+      expect(result.coverageOptions.roadsideAssistance).toBe(120);
+      expect(result.coverageOptions.rentalCar).toBe(180);
+      expect(result.coverageOptions.glassCoverage).toBe(90);
+      expect(result.totalCoverageCost).toBe(390); // 120 + 180 + 90
+      expect(result.finalPremium).toBe(1470); // 1080 + 390
+    });
+
+    test('should not add cost for disabled coverage options', () => {
+      const result = calculatePremium('car', 35, { 
+        roadsideAssistance: true,
+        rentalCar: false,
+        glassCoverage: true
+      });
+      
+      expect(result.coverageOptions.roadsideAssistance).toBe(120);
+      expect(result.coverageOptions.glassCoverage).toBe(90);
+      expect(result.coverageOptions.rentalCar).toBeUndefined();
+      expect(result.totalCoverageCost).toBe(210); // 120 + 90
+      expect(result.finalPremium).toBe(1290); // 1080 + 210
+    });
+
+    test('should handle empty coverage options object', () => {
+      const result = calculatePremium('car', 35, {});
+      
+      expect(result.coverageOptions).toEqual({});
+      expect(result.totalCoverageCost).toBe(0);
+      expect(result.finalPremium).toBe(1080);
     });
   });
 });

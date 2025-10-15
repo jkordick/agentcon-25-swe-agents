@@ -45,6 +45,97 @@ describe('Insurance Quote API', () => {
       expect(response.body.finalPremium).toBeGreaterThan(2500);
     });
 
+    test('should calculate premium with roadside assistance coverage', async () => {
+      const response = await request(app)
+        .post('/quote')
+        .send({
+          vehicleType: 'car',
+          driverAge: 35,
+          coverageOptions: {
+            roadsideAssistance: true
+          }
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.coverageOptions).toHaveProperty('roadsideAssistance');
+      expect(response.body.coverageOptions.roadsideAssistance).toBe(120);
+      expect(response.body.totalCoverageCost).toBe(120);
+      expect(response.body.finalPremium).toBe(1200); // 1080 base + 120 coverage
+    });
+
+    test('should calculate premium with multiple coverage options', async () => {
+      const response = await request(app)
+        .post('/quote')
+        .send({
+          vehicleType: 'car',
+          driverAge: 35,
+          coverageOptions: {
+            roadsideAssistance: true,
+            rentalCar: true,
+            glassCoverage: true
+          }
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.coverageOptions.roadsideAssistance).toBe(120);
+      expect(response.body.coverageOptions.rentalCar).toBe(180);
+      expect(response.body.coverageOptions.glassCoverage).toBe(90);
+      expect(response.body.totalCoverageCost).toBe(390);
+      expect(response.body.finalPremium).toBe(1470); // 1080 base + 390 coverage
+    });
+
+    test('should handle mixed enabled/disabled coverage options', async () => {
+      const response = await request(app)
+        .post('/quote')
+        .send({
+          vehicleType: 'car',
+          driverAge: 35,
+          coverageOptions: {
+            roadsideAssistance: true,
+            rentalCar: false,
+            glassCoverage: true
+          }
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.coverageOptions.roadsideAssistance).toBe(120);
+      expect(response.body.coverageOptions.glassCoverage).toBe(90);
+      expect(response.body.coverageOptions.rentalCar).toBeUndefined();
+      expect(response.body.totalCoverageCost).toBe(210);
+    });
+
+    test('should return 400 for invalid coverage option', async () => {
+      const response = await request(app)
+        .post('/quote')
+        .send({
+          vehicleType: 'car',
+          driverAge: 35,
+          coverageOptions: {
+            invalidCoverage: true
+          }
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.message).toContain('Unsupported coverage option');
+    });
+
+    test('should return 400 for non-boolean coverage option value', async () => {
+      const response = await request(app)
+        .post('/quote')
+        .send({
+          vehicleType: 'car',
+          driverAge: 35,
+          coverageOptions: {
+            roadsideAssistance: 'yes'
+          }
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.message).toContain('must be a boolean value');
+    });
+
     test('should return 400 for invalid vehicle type', async () => {
       const response = await request(app)
         .post('/quote')

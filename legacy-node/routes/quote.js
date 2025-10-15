@@ -5,10 +5,10 @@ const { calculatePremium, validateQuoteRequest } = require('../services/quoteSer
 // POST /quote - Calculate insurance premium
 router.post('/', (req, res) => {
   try {
-    const { vehicleType, driverAge } = req.body;
+    const { vehicleType, driverAge, coverageOptions } = req.body;
 
     // Validate input
-    const validation = validateQuoteRequest(vehicleType, driverAge);
+    const validation = validateQuoteRequest(vehicleType, driverAge, coverageOptions);
     if (!validation.isValid) {
       return res.status(400).json({ 
         error: 'Invalid input', 
@@ -17,7 +17,7 @@ router.post('/', (req, res) => {
     }
 
     // Calculate premium
-    const result = calculatePremium(vehicleType, driverAge);
+    const result = calculatePremium(vehicleType, driverAge, coverageOptions);
     
     res.status(200).json(result);
   } catch (error) {

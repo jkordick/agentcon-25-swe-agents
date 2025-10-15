@@ -14,13 +14,21 @@ const AGE_MULTIPLIERS = {
   'senior': 1.3    // 66+
 };
 
+// Coverage options and their pricing
+const COVERAGE_OPTIONS = {
+  'roadsideAssistance': 120,
+  'rentalCar': 180,
+  'glassCoverage': 90
+};
+
 /**
  * Validates the quote request input
  * @param {string} vehicleType - Type of vehicle
  * @param {number} driverAge - Age of driver
+ * @param {object} coverageOptions - Optional coverage options
  * @returns {object} Validation result
  */
-function validateQuoteRequest(vehicleType, driverAge) {
+function validateQuoteRequest(vehicleType, driverAge, coverageOptions = {}) {
   if (!vehicleType || typeof vehicleType !== 'string') {
     return { isValid: false, message: 'Vehicle type is required and must be a string' };
   }
@@ -35,6 +43,24 @@ function validateQuoteRequest(vehicleType, driverAge) {
       isValid: false, 
       message: `Unsupported vehicle type. Supported types: ${Object.keys(VEHICLE_BASE_RATES).join(', ')}` 
     };
+  }
+
+  // Validate coverage options if provided
+  if (coverageOptions && typeof coverageOptions === 'object') {
+    for (const [key, value] of Object.entries(coverageOptions)) {
+      if (!COVERAGE_OPTIONS[key]) {
+        return {
+          isValid: false,
+          message: `Unsupported coverage option: ${key}. Supported options: ${Object.keys(COVERAGE_OPTIONS).join(', ')}`
+        };
+      }
+      if (typeof value !== 'boolean') {
+        return {
+          isValid: false,
+          message: `Coverage option ${key} must be a boolean value`
+        };
+      }
+    }
   }
 
   return { isValid: true };
@@ -55,9 +81,10 @@ function getAgeCategory(age) {
  * Calculates insurance premium based on vehicle type and driver age
  * @param {string} vehicleType - Type of vehicle
  * @param {number} driverAge - Age of driver
+ * @param {object} coverageOptions - Optional coverage options
  * @returns {object} Premium calculation result
  */
-function calculatePremium(vehicleType, driverAge) {
+function calculatePremium(vehicleType, driverAge, coverageOptions = {}) {
   const normalizedVehicleType = vehicleType.toLowerCase();
   const baseRate = VEHICLE_BASE_RATES[normalizedVehicleType];
   const ageCategory = getAgeCategory(driverAge);
@@ -82,8 +109,25 @@ function calculatePremium(vehicleType, driverAge) {
   // Round to 2 decimal places
   premium = Math.round(premium * 100) / 100;
 
+  // Calculate additional coverage costs
+  const coverageBreakdown = {};
+  let totalCoverageCost = 0;
+
+  if (coverageOptions && typeof coverageOptions === 'object') {
+    for (const [option, enabled] of Object.entries(coverageOptions)) {
+      if (enabled && COVERAGE_OPTIONS[option]) {
+        const cost = COVERAGE_OPTIONS[option];
+        coverageBreakdown[option] = cost;
+        totalCoverageCost += cost;
+      }
+    }
+  }
+
+  // Total premium includes base premium + coverage costs
+  const finalPremium = premium + totalCoverageCost;
+
   // Determine if premium is reasonable or too high (peasant-level)
-  const isPeasantLevel = premium > 2500;
+  const isPeasantLevel = finalPremium > 2500;
   
   return {
     vehicleType: vehicleType,
@@ -91,7 +135,10 @@ function calculatePremium(vehicleType, driverAge) {
     ageCategory: ageCategory,
     basePremium: baseRate,
     ageMultiplier: ageMultiplier,
-    finalPremium: premium,
+    calculatedPremium: premium,
+    coverageOptions: coverageBreakdown,
+    totalCoverageCost: totalCoverageCost,
+    finalPremium: finalPremium,
     currency: 'USD',
     status: isPeasantLevel ? 'peasant' : 'premium',
     message: isPeasantLevel 
@@ -104,5 +151,6 @@ module.exports = {
   calculatePremium,
   validateQuoteRequest,
   VEHICLE_BASE_RATES,
-  AGE_MULTIPLIERS
+  AGE_MULTIPLIERS,
+  COVERAGE_OPTIONS
 };
