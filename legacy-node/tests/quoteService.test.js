@@ -35,6 +35,16 @@ describe('Quote Service', () => {
       expect(result.isValid).toBe(false);
       expect(result.message).toContain('must be a boolean value');
     });
+
+    test('should handle array as coverage options', () => {
+      const result = validateQuoteRequest('car', 30, ['roadsideAssistance']);
+      expect(result.isValid).toBe(true); // Arrays are not validated, treated as no coverage
+    });
+
+    test('should handle null coverage options', () => {
+      const result = validateQuoteRequest('car', 30, null);
+      expect(result.isValid).toBe(true);
+    });
   });
 
   describe('calculatePremium', () => {
@@ -120,6 +130,22 @@ describe('Quote Service', () => {
 
     test('should handle empty coverage options object', () => {
       const result = calculatePremium('car', 35, {});
+      
+      expect(result.coverageOptions).toEqual({});
+      expect(result.totalCoverageCost).toBe(0);
+      expect(result.finalPremium).toBe(1080);
+    });
+
+    test('should handle null coverage options', () => {
+      const result = calculatePremium('car', 35, null);
+      
+      expect(result.coverageOptions).toEqual({});
+      expect(result.totalCoverageCost).toBe(0);
+      expect(result.finalPremium).toBe(1080);
+    });
+
+    test('should handle undefined coverage options', () => {
+      const result = calculatePremium('car', 35, undefined);
       
       expect(result.coverageOptions).toEqual({});
       expect(result.totalCoverageCost).toBe(0);

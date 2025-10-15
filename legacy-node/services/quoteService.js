@@ -46,7 +46,7 @@ function validateQuoteRequest(vehicleType, driverAge, coverageOptions = {}) {
   }
 
   // Validate coverage options if provided
-  if (coverageOptions && typeof coverageOptions === 'object') {
+  if (coverageOptions && typeof coverageOptions === 'object' && !Array.isArray(coverageOptions)) {
     for (const [key, value] of Object.entries(coverageOptions)) {
       if (!COVERAGE_OPTIONS[key]) {
         return {
@@ -113,7 +113,7 @@ function calculatePremium(vehicleType, driverAge, coverageOptions = {}) {
   const coverageBreakdown = {};
   let totalCoverageCost = 0;
 
-  if (coverageOptions && typeof coverageOptions === 'object') {
+  if (coverageOptions && typeof coverageOptions === 'object' && !Array.isArray(coverageOptions)) {
     for (const [option, enabled] of Object.entries(coverageOptions)) {
       if (enabled && COVERAGE_OPTIONS[option]) {
         const cost = COVERAGE_OPTIONS[option];
