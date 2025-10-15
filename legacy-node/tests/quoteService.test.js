@@ -36,9 +36,10 @@ describe('Quote Service', () => {
       expect(result.message).toContain('must be a boolean value');
     });
 
-    test('should handle array as coverage options', () => {
+    test('should reject array as coverage options', () => {
       const result = validateQuoteRequest('car', 30, ['roadsideAssistance']);
-      expect(result.isValid).toBe(true); // Arrays are not validated, treated as no coverage
+      expect(result.isValid).toBe(false);
+      expect(result.message).toContain('must be an object, not an array');
     });
 
     test('should handle null coverage options', () => {

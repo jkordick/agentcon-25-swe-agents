@@ -46,7 +46,19 @@ function validateQuoteRequest(vehicleType, driverAge, coverageOptions = {}) {
   }
 
   // Validate coverage options if provided
-  if (coverageOptions && typeof coverageOptions === 'object' && !Array.isArray(coverageOptions)) {
+  if (coverageOptions !== undefined && coverageOptions !== null) {
+    if (Array.isArray(coverageOptions)) {
+      return {
+        isValid: false,
+        message: 'Coverage options must be an object, not an array'
+      };
+    }
+    if (typeof coverageOptions !== 'object') {
+      return {
+        isValid: false,
+        message: 'Coverage options must be an object'
+      };
+    }
     for (const [key, value] of Object.entries(coverageOptions)) {
       if (!COVERAGE_OPTIONS[key]) {
         return {

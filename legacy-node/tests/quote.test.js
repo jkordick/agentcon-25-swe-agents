@@ -136,6 +136,20 @@ describe('Insurance Quote API', () => {
       expect(response.body.message).toContain('must be a boolean value');
     });
 
+    test('should return 400 for array as coverage options', async () => {
+      const response = await request(app)
+        .post('/quote')
+        .send({
+          vehicleType: 'car',
+          driverAge: 35,
+          coverageOptions: ['roadsideAssistance']
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.message).toContain('must be an object, not an array');
+    });
+
     test('should return 400 for invalid vehicle type', async () => {
       const response = await request(app)
         .post('/quote')
