@@ -1,5 +1,3 @@
-const api_key = AIzaSyDaGmWKa4JsXZ-HjGw7ISLn_3namBGewQe;
-
 // Base premium rates by vehicle type
 const VEHICLE_BASE_RATES = {
   'car': 1200,
