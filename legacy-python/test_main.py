@@ -146,5 +146,85 @@ class TestCustomerProfileService:
         assert data["last_name"] == "Rykhlevskyi"
 
 
+class TestRiskAssessment:
+    
+    def test_risk_assessment_young_adult(self):
+        """Test risk assessment for young adult (18-24)"""
+        response = requests.get(f"{BASE_URL}/risk-assessment/age-range?age=22")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["age"] == 22
+        assert data["age_range"] == "18-24"
+        assert data["risk_level"] == "High"
+        assert "risk_factors" in data
+        assert "premium_modifier" in data
+    
+    def test_risk_assessment_middle_age(self):
+        """Test risk assessment for middle age (40-59)"""
+        response = requests.get(f"{BASE_URL}/risk-assessment/age-range?age=45")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["age"] == 45
+        assert data["age_range"] == "40-59"
+        assert data["risk_level"] == "Low"
+        assert "risk_factors" in data
+    
+    def test_risk_assessment_senior(self):
+        """Test risk assessment for senior (75+)"""
+        response = requests.get(f"{BASE_URL}/risk-assessment/age-range?age=80")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["age"] == 80
+        assert data["age_range"] == "75+"
+        assert data["risk_level"] == "High"
+    
+    def test_risk_assessment_minor(self):
+        """Test risk assessment for minor (under 18)"""
+        response = requests.get(f"{BASE_URL}/risk-assessment/age-range?age=16")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["age"] == 16
+        assert data["age_range"] == "Under 18"
+        assert data["risk_level"] == "Low"
+    
+    def test_risk_assessment_easter_egg(self):
+        """Test easter egg for age 1337"""
+        response = requests.get(f"{BASE_URL}/risk-assessment/age-range?age=1337")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["age"] == 1337
+        assert "joke" in data
+        assert "elite_status" in data
+        assert "1337" in data["elite_status"]
+    
+    def test_risk_assessment_missing_age(self):
+        """Test risk assessment without age parameter"""
+        response = requests.get(f"{BASE_URL}/risk-assessment/age-range")
+        assert response.status_code == 400
+        data = response.json()
+        assert "missing" in data["error"].lower()
+    
+    def test_risk_assessment_invalid_age(self):
+        """Test risk assessment with invalid age"""
+        response = requests.get(f"{BASE_URL}/risk-assessment/age-range?age=abc")
+        assert response.status_code == 400
+        data = response.json()
+        assert "integer" in data["error"].lower()
+    
+    def test_risk_assessment_negative_age(self):
+        """Test risk assessment with negative age"""
+        response = requests.get(f"{BASE_URL}/risk-assessment/age-range?age=-5")
+        assert response.status_code == 400
+        data = response.json()
+        assert "non-negative" in data["error"].lower()
+    
+    def test_risk_assessment_age_too_high(self):
+        """Test risk assessment with age over 150"""
+        response = requests.get(f"{BASE_URL}/risk-assessment/age-range?age=200")
+        assert response.status_code == 400
+        data = response.json()
+        assert "150" in data["error"]
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

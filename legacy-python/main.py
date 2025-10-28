@@ -49,6 +49,8 @@ class CustomerProfileHandler(BaseHTTPRequestHandler):
                 self._handle_health()
             elif self.path.startswith('/customers/'):
                 self._handle_get_customer()
+            elif self.path.startswith('/risk-assessment/age-range'):
+                self._handle_risk_assessment()
             else:
                 self._send_error_response(404, "Not found")
         except Exception as e:
@@ -74,7 +76,8 @@ class CustomerProfileHandler(BaseHTTPRequestHandler):
             "endpoints": [
                 "GET /customers/{id} - Fetch customer profile",
                 "PATCH /customers/{id} - Update customer profile",
-                "GET /health - Health check"
+                "GET /health - Health check",
+                "GET /risk-assessment/age-range?age={age} - Get risk assessment information for age range"
             ]
         }
         self._send_response(200, response_data)
@@ -169,6 +172,86 @@ class CustomerProfileHandler(BaseHTTPRequestHandler):
         updated_customer = customer_db.update_customer(customer_id, json_data)
         self._send_response(200, updated_customer.to_dict())
     
+    def _handle_risk_assessment(self):
+        """Handle GET /risk-assessment/age-range?age={age}"""
+        # Parse query parameters
+        parsed_path = urllib.parse.urlparse(self.path)
+        query_params = urllib.parse.parse_qs(parsed_path.query)
+        
+        # Check if age parameter is provided
+        if 'age' not in query_params:
+            self._send_error_response(400, "Missing required parameter 'age'")
+            return
+        
+        try:
+            age = int(query_params['age'][0])
+        except (ValueError, IndexError):
+            self._send_error_response(400, "Age must be a valid integer")
+            return
+        
+        # Easter egg for age 1337
+        if age == 1337:
+            response_data = {
+                "age": age,
+                "message": "🎉 You found the easter egg! 🎉",
+                "joke": "Why do programmers prefer dark mode? Because light attracts bugs! 🐛💡",
+                "elite_status": "1337 - You are truly elite!"
+            }
+            self._send_response(200, response_data)
+            return
+        
+        # Validate age range
+        if age < 0:
+            self._send_error_response(400, "Age must be a non-negative integer")
+            return
+        
+        if age > 150:
+            self._send_error_response(400, "Age must be 150 or less")
+            return
+        
+        # Determine age range and risk assessment
+        if age < 18:
+            age_range = "Under 18"
+            risk_level = "Low"
+            risk_factors = ["Limited driving experience", "Parental supervision typically required"]
+            premium_modifier = "Standard with parental discount"
+        elif age < 25:
+            age_range = "18-24"
+            risk_level = "High"
+            risk_factors = ["Statistically higher accident rates", "Less driving experience", "Higher likelihood of risky behavior"]
+            premium_modifier = "Increased by 50-100%"
+        elif age < 40:
+            age_range = "25-39"
+            risk_level = "Low to Medium"
+            risk_factors = ["Generally responsible driving behavior", "Established driving history"]
+            premium_modifier = "Standard rate"
+        elif age < 60:
+            age_range = "40-59"
+            risk_level = "Low"
+            risk_factors = ["Extensive driving experience", "Lower accident rates", "Mature decision-making"]
+            premium_modifier = "Reduced by 10-20%"
+        elif age < 75:
+            age_range = "60-74"
+            risk_level = "Medium"
+            risk_factors = ["Potential health-related concerns", "Slower reaction times", "Senior discount eligibility"]
+            premium_modifier = "Standard rate with senior discount"
+        else:
+            age_range = "75+"
+            risk_level = "High"
+            risk_factors = ["Increased health concerns", "Vision and mobility challenges", "Higher accident severity"]
+            premium_modifier = "Increased by 30-50%"
+        
+        response_data = {
+            "age": age,
+            "age_range": age_range,
+            "risk_level": risk_level,
+            "risk_factors": risk_factors,
+            "premium_modifier": premium_modifier,
+            "description": f"Risk assessment for customers in the {age_range} age range"
+        }
+        
+        self._send_response(200, response_data)
+    
     def log_message(self, format, *args):
         """Override to customize logging"""
         print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {format % args}")
@@ -185,6 +268,7 @@ def run_server(port=8000):
     print("  GET  /health        - Health check")
     print("  GET  /customers/{id} - Get customer profile")
     print("  PATCH /customers/{id} - Update customer profile")
+    print("  GET  /risk-assessment/age-range?age={age} - Get risk assessment by age")
     print("\nPress Ctrl+C to stop the server")
     
     try:
