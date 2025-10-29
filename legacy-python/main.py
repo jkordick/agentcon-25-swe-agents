@@ -106,6 +106,26 @@ class CustomerProfileHandler(BaseHTTPRequestHandler):
             self._send_error_response(400, "Customer ID must be a positive integer")
             return
         
+        # Easter egg: return a joke when ID is 1337
+        if customer_id == 1337:
+            joke_response = {
+                "id": 1337,
+                "joke": "Why do programmers prefer dark mode? Because light attracts bugs! 🐛",
+                "message": "You found the easter egg! 🎉"
+            }
+            self._send_response(200, joke_response)
+            return
+        
+        # Easter egg: return the meaning of life when ID is 42
+        if customer_id == 42:
+            meaning_response = {
+                "id": 42,
+                "answer": "The Answer to the Ultimate Question of Life, the Universe, and Everything is 42",
+                "message": "Don't panic! You found the Hitchhiker's Guide easter egg! 🚀"
+            }
+            self._send_response(200, meaning_response)
+            return
+        
         customer = customer_db.get_customer(customer_id)
         if customer is None:
             self._send_error_response(404, f"Customer with ID {customer_id} not found")

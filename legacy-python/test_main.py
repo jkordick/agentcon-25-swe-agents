@@ -145,6 +145,25 @@ class TestCustomerProfileService:
         assert data["first_name"] == "Igor"
         assert data["last_name"] == "Rykhlevskyi"
 
+    def test_easter_egg_1337_joke(self):
+        """Test easter egg: customer ID 1337 returns a joke"""
+        response = requests.get(f"{BASE_URL}/customers/1337")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["id"] == 1337
+        assert "joke" in data
+        assert "easter egg" in data["message"].lower()
+
+    def test_easter_egg_42_meaning_of_life(self):
+        """Test easter egg: customer ID 42 returns the meaning of life"""
+        response = requests.get(f"{BASE_URL}/customers/42")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["id"] == 42
+        assert "answer" in data
+        assert "42" in data["answer"]
+        assert "easter egg" in data["message"].lower()
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
