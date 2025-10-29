@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Simple Customer Profile Service using Python's built-in http.server
-Compatible with Python 3.8+
+Compatible with Python 3.12+
 """
 
 import json
