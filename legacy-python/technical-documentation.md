@@ -136,7 +136,7 @@ Only the following fields can be modified via PATCH:
 None required - all configuration is hardcoded for simplicity.
 
 ### Dependencies
-- **Runtime**: Python 3.8+ standard library only
+- **Runtime**: Python 3.12+ standard library only
 - **Testing**: pytest, requests
 
 ## Performance Characteristics

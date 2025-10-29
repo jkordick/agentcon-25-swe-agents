@@ -1,6 +1,6 @@
 # Customer Profile Service
 
-A Python 3.8 customer profile service using Python's built-in `http.server` module for maximum compatibility.
+A Python 3.12+ customer profile service using Python's built-in `http.server` module for maximum compatibility.
 
 ## Features
 

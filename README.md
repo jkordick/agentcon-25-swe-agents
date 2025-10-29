@@ -11,7 +11,7 @@ This project contains **three containerized “legacy” backends** from the ins
 | Service | Language | Purpose |
 |--------|----------|---------|
 | `legacy-java` | Java 11 (Spring Boot, Maven) | Handles insurance claim submission and tracking |
-| `legacy-python` | Python 3.8 | Manages customer profile data |
+| `legacy-python` | Python 3.12+ | Manages customer profile data |
 | `legacy-node` | Node.js 16 (Express) | Calculates policy quotes based on input criteria |
 
 Each backend is accompanied by:
@@ -51,14 +51,14 @@ For the best development experience with all tools pre-configured:
 3. Wait for the container to build (first time takes ~5-10 minutes)
 4. Start all services: `./scripts/start-all.sh`
 
-The dev container includes Java 11, Node.js 16, Python 3.8, and all necessary development tools including GitHub Copilot for AI assistance.
+The dev container includes Java 11, Node.js 16, Python 3.12+, and all necessary development tools including GitHub Copilot for AI assistance.
 
 ### Option 2: Local Installation
 
 Ensure you have installed:
 - Java 11 + Maven
 - Node.js 16 + npm  
-- Python 3.8 + pip
+- Python 3.12+ + pip
 
 Then start each service individually:
 
