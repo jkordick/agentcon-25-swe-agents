@@ -79,6 +79,62 @@ describe('Insurance Quote API', () => {
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error');
     });
+
+    test('should calculate premium with roadside assistance coverage', async () => {
+      const response = await request(app)
+        .post('/quote')
+        .send({
+          vehicleType: 'car',
+          driverAge: 35,
+          coverageOptions: {
+            roadsideAssistance: true
+          }
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('coverageBreakdown');
+      expect(response.body.coverageBreakdown).toHaveProperty('roadsideAssistance');
+      expect(response.body.coverageBreakdown.roadsideAssistance).toBe(75);
+      expect(response.body.coverageCost).toBe(75);
+      expect(response.body.finalPremium).toBe(1155); // 1080 + 75
+    });
+
+    test('should calculate premium with multiple coverage options', async () => {
+      const response = await request(app)
+        .post('/quote')
+        .send({
+          vehicleType: 'car',
+          driverAge: 35,
+          coverageOptions: {
+            roadsideAssistance: true,
+            rentalCar: true,
+            glassCoverage: true
+          }
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.coverageBreakdown.roadsideAssistance).toBe(75);
+      expect(response.body.coverageBreakdown.rentalCar).toBe(120);
+      expect(response.body.coverageBreakdown.glassCoverage).toBe(95);
+      expect(response.body.coverageCost).toBe(290);
+      expect(response.body.finalPremium).toBe(1370); // 1080 + 290
+    });
+
+    test('should return 400 for invalid coverage option', async () => {
+      const response = await request(app)
+        .post('/quote')
+        .send({
+          vehicleType: 'car',
+          driverAge: 35,
+          coverageOptions: {
+            invalidOption: true
+          }
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error');
+      expect(response.body.message).toContain('Invalid coverage option');
+    });
   });
 
   describe('GET /health', () => {
